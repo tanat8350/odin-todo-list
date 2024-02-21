@@ -1,6 +1,7 @@
 // import * as task from "./task.js";
 
 const projects = [];
+let currentProject = 0;
 
 class Project {
   constructor(name) {
@@ -15,14 +16,17 @@ const content = document.querySelector(".content");
 const selectProjectList = document.querySelector("#project-list");
 
 selectProjectList.addEventListener("change", () => {
+  currentProject = selectProjectList.value;
+  console.log(currentProject);
   renderTasks();
 });
 
 function renderProjectList() {
   clearProjectList();
-  projects.forEach((item) => {
+  projects.forEach((item, index) => {
     const option = document.createElement("option");
     option.textContent = item.name;
+    option.value = index;
 
     selectProjectList.appendChild(option);
   });
@@ -59,11 +63,7 @@ btnProjectNew.addEventListener("click", () => {
 
 const btnProjectDelete = document.querySelector(".project-delete-btn");
 btnProjectDelete.addEventListener("click", () => {
-  projects.forEach((item, index) => {
-    if (item.name === selectProjectList.value) {
-      projects.splice(index, 1);
-    }
-  });
+  projects.splice(currentProject, 1);
   renderProjectList();
   renderTasks();
 });
@@ -82,11 +82,7 @@ const inputNewTaskTitle = document.querySelector("#new-task-title");
 const inputNewTaskDueDate = document.querySelector("#new-task-due-date");
 
 function addTask(title, dueDate) {
-  projects.forEach((item) => {
-    if (item.name === selectProjectList.value) {
-      item.tasks.push(new Task(title, dueDate));
-    }
-  });
+  projects[currentProject].tasks.push(new Task(title, dueDate));
 }
 
 btnNewTask.addEventListener("click", () => {
@@ -112,17 +108,60 @@ function addDeleteBtn(projectTask, index) {
   });
 }
 
+const editor = document.querySelector("dialog");
+const editorTitle = document.querySelector("#edit-title");
+const editorDescription = document.querySelector("#edit-description");
+const editorDueDate = document.querySelector("#edit-due-date");
+const editorPriority = document.querySelector("#edit-priority");
+
+editor.addEventListener("click", (e) => {
+  const target = e.target;
+  if (target.classList.contains("edit-submit-btn")) {
+    projects[0].tasks[openingTask].title = editorTitle.value;
+    projects[0].tasks[openingTask].description = editorDescription.value;
+    projects[0].tasks[openingTask].dueDate = editorDueDate.value;
+    projects[0].tasks[openingTask].priority = editorPriority.checked;
+    renderTasks();
+    console.log(projects);
+  }
+  if (target.classList.contains("edit-close-btn")) {
+    editor.close();
+  }
+});
+
+let openingTask;
+
+function addEditBtn(projectTask, index) {
+  const btn = document.createElement("button");
+  btn.textContent = "Edit";
+  content.appendChild(btn);
+  btn.addEventListener("click", () => {
+    openingTask = index;
+    projectTask.title
+      ? (editorTitle.value = projectTask.title)
+      : (editorTitle.value = "");
+    projectTask.description
+      ? (editorDescription.value = projectTask.description)
+      : (editorDescription.value = "");
+    projectTask.dueDate
+      ? (editorDueDate.value = projectTask.dueDate)
+      : (editorDueDate.value = "");
+    projectTask.priority
+      ? (editorPriority.checked = projectTask.priority)
+      : (editorPriority.checked = false);
+    editor.show();
+  });
+}
+
 function renderTasks() {
   clearContent();
-  projects.forEach((item) => {
-    if (item.name === selectProjectList.value) {
-      const tasks = item.tasks;
-      tasks.forEach((task, index) => {
-        const para = document.createElement("p");
-        para.textContent = `${task.title} DueDate${task.dueDate}`;
-        content.appendChild(para);
-        addDeleteBtn(tasks, index);
-      });
-    }
+  const tasks = projects[currentProject].tasks;
+
+  tasks.forEach((task, index) => {
+    const para = document.createElement("p");
+    para.textContent = `${task.title} DueDate${task.dueDate}`;
+    content.appendChild(para);
+    addEditBtn(task, index);
+    addDeleteBtn(tasks, index);
   });
 }

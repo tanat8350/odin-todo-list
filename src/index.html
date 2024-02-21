@@ -13,6 +13,28 @@
   </header>
 
   <main>
+    <dialog>
+      <form method="dialog">
+        <div>
+          <label for="edit-title">Title <span>*</span></label>
+          <input type="text" name="edit-title" id="edit-title" required autofocus>
+        </div>
+        <div>
+          <label for="edit-description">Description</label>
+          <input type="text" name="edit-description" id="edit-description">
+        </div>
+        <div>
+          <label for="edit-due-date">Due Date</label>
+          <input type="text" name="edit-due-date" id="edit-due-date">
+        </div>
+        <div>
+          <label for="edit-priority">Priority</label>
+          <input type="checkbox" name="edit-priority" id="edit-priority">
+        </div>
+        <button class="edit-submit-btn" type="submit">Submit</button>
+        <button class="edit-close-btn" type="button">Close</button>
+      </form>
+    </dialog>
     <div class="project-new-container">
       <label for="project-new">Create New Project</label>
       <input name="project-new" id="project-new">
@@ -31,7 +53,7 @@
       </div>
       <div>
         <label for="new-task-due-date">Due Date</label>
-        <input name="new-task-due-date" id="new-task-due-date">
+        <input type="date" name="new-task-due-date" id="new-task-due-date">
       </div>
       <button class="new-task-btn">Add</button>
     </div>
