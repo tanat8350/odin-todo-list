@@ -153,15 +153,35 @@ function addEditBtn(projectTask, index) {
   });
 }
 
+const allProjects = document.querySelector("#all-projects");
+
+allProjects.addEventListener("change", () => {
+  renderTasks();
+});
+
+function renderAllTasks() {
+  projects.forEach((project, projectIndex) => {
+    project.tasks.forEach((task) => {
+      const para = document.createElement("p");
+      para.textContent = `${task.title} DueDate${task.dueDate} ${project.name}`;
+      content.appendChild(para);
+    });
+  });
+}
+
 function renderTasks() {
   clearContent();
-  const tasks = projects[currentProject].tasks;
+  if (allProjects.checked) {
+    renderAllTasks();
+  } else {
+    const tasks = projects[currentProject].tasks;
 
-  tasks.forEach((task, index) => {
-    const para = document.createElement("p");
-    para.textContent = `${task.title} DueDate${task.dueDate}`;
-    content.appendChild(para);
-    addEditBtn(task, index);
-    addDeleteBtn(tasks, index);
-  });
+    tasks.forEach((task, index) => {
+      const para = document.createElement("p");
+      para.textContent = `${task.title} DueDate${task.dueDate}`;
+      content.appendChild(para);
+      addEditBtn(task, index);
+      addDeleteBtn(tasks, index);
+    });
+  }
 }
