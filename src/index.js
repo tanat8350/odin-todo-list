@@ -1,5 +1,10 @@
 import "./style.css";
 
+// TODO: complete list
+// TODO: add expand
+// TODO: composition
+// TODO: near due date
+
 class Project {
   constructor(name) {
     this.name = name;
