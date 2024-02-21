@@ -1,7 +1,6 @@
-// import * as task from "./task.js";
-
 const projects = [];
-let currentProject = 0;
+let openingProject = 0;
+let openingTask;
 
 class Project {
   constructor(name) {
@@ -12,14 +11,81 @@ class Project {
 projects.push(new Project("test1"));
 projects.push(new Project("test2"));
 
+class Task {
+  constructor(title, dueDate, description, priority) {
+    this.title = title;
+    this.dueDate = dueDate;
+    this.description = description;
+    this.priority = priority;
+  }
+}
+
+// Create New Project
+const inputProjectNew = document.querySelector("#project-new");
+const btnProjectNew = document.querySelector(".project-new-btn");
+const errorProjectNew = document.querySelector(".project-new-error");
+
+function checkUniqueProject(name) {
+  let result = false;
+  projects.forEach((item) => {
+    if (item.name === name) {
+      errorProjectNew.textContent = "Project already exists";
+      setTimeout(() => {
+        errorProjectNew.textContent = "";
+      }, 2000);
+      return (result = true);
+    }
+  });
+  return result;
+}
+
+btnProjectNew.addEventListener("click", () => {
+  if (inputProjectNew.value) {
+    if (!checkUniqueProject(inputProjectNew.value)) {
+      projects.push(new Project(inputProjectNew.value));
+      inputProjectNew.value = "";
+      renderProjectList();
+      selectProjectList.value = projects.length - 1;
+      openingProject = selectProjectList.value;
+      renderTasks();
+    }
+  }
+});
+
+// Select Project
 const content = document.querySelector(".content");
+
+const projectContainer = document.querySelector(".project-container");
 const selectProjectList = document.querySelector("#project-list");
+const inputProjectRename = document.querySelector("#project-rename");
+
+projectContainer.addEventListener("click", (e) => {
+  const target = e.target;
+
+  if (target.classList.contains("project-delete-btn")) {
+    projects.splice(openingProject, 1);
+    renderProjectList();
+    renderTasks();
+  }
+
+  if (target.classList.contains("project-rename-btn")) {
+    if (inputProjectRename.value) {
+      projects[openingProject].name = inputProjectRename.value;
+      inputProjectRename.value = "";
+      renderProjectList();
+      renderTasks();
+    }
+  }
+});
 
 selectProjectList.addEventListener("change", () => {
-  currentProject = selectProjectList.value;
-  console.log(currentProject);
+  openingProject = selectProjectList.value;
   renderTasks();
 });
+
+function clearProjectList() {
+  selectProjectList.innerText = "";
+}
 
 function renderProjectList() {
   clearProjectList();
@@ -33,56 +99,20 @@ function renderProjectList() {
 }
 renderProjectList();
 
-function clearProjectList() {
-  selectProjectList.innerText = "";
-}
+// All Projects
+const allProjects = document.querySelector("#all-projects");
 
-const inputProjectNew = document.querySelector("#project-new");
-const btnProjectNew = document.querySelector(".project-new-btn");
-
-function checkUniqueProject(name) {
-  let result = false;
-  projects.forEach((item) => {
-    if (item.name === name) {
-      console.log("Error duplicate name");
-      return (result = true);
-    }
-  });
-  return result;
-}
-
-btnProjectNew.addEventListener("click", () => {
-  if (inputProjectNew.value) {
-    if (!checkUniqueProject(inputProjectNew.value)) {
-      projects.push(new Project(inputProjectNew.value));
-      inputProjectNew.value = "";
-      renderProjectList();
-    }
-  }
-});
-
-const btnProjectDelete = document.querySelector(".project-delete-btn");
-btnProjectDelete.addEventListener("click", () => {
-  projects.splice(currentProject, 1);
-  renderProjectList();
+allProjects.addEventListener("change", () => {
   renderTasks();
 });
 
-class Task {
-  constructor(title, dueDate, description, priority) {
-    this.title = title;
-    this.dueDate = dueDate;
-    this.description = description;
-    this.priority = priority;
-  }
-}
-
-const btnNewTask = document.querySelector(".new-task-btn");
+// New Task
 const inputNewTaskTitle = document.querySelector("#new-task-title");
 const inputNewTaskDueDate = document.querySelector("#new-task-due-date");
+const btnNewTask = document.querySelector(".new-task-btn");
 
 function addTask(title, dueDate) {
-  projects[currentProject].tasks.push(new Task(title, dueDate));
+  projects[openingProject].tasks.push(new Task(title, dueDate));
 }
 
 btnNewTask.addEventListener("click", () => {
@@ -98,44 +128,16 @@ function clearContent() {
   content.innerText = "";
 }
 
-function addDeleteBtn(projectTask, index) {
-  const btn = document.createElement("button");
-  btn.textContent = "Delete";
-  content.appendChild(btn);
-  btn.addEventListener("click", () => {
-    projectTask.splice(index, 1);
-    renderTasks();
-  });
-}
-
-const editor = document.querySelector("dialog");
-const editorTitle = document.querySelector("#edit-title");
-const editorDescription = document.querySelector("#edit-description");
-const editorDueDate = document.querySelector("#edit-due-date");
-const editorPriority = document.querySelector("#edit-priority");
-
-editor.addEventListener("click", (e) => {
-  const target = e.target;
-  if (target.classList.contains("edit-submit-btn")) {
-    projects[0].tasks[openingTask].title = editorTitle.value;
-    projects[0].tasks[openingTask].description = editorDescription.value;
-    projects[0].tasks[openingTask].dueDate = editorDueDate.value;
-    projects[0].tasks[openingTask].priority = editorPriority.checked;
-    renderTasks();
-    console.log(projects);
-  }
-  if (target.classList.contains("edit-close-btn")) {
-    editor.close();
-  }
-});
-
-let openingTask;
-
-function addEditBtn(projectTask, index) {
+function addEditBtn(projectTask, index, projectIndex) {
   const btn = document.createElement("button");
   btn.textContent = "Edit";
   content.appendChild(btn);
   btn.addEventListener("click", () => {
+    if (projectIndex >= 0) {
+      selectProjectList.value = projectIndex;
+      openingProject = selectProjectList.value;
+    }
+
     openingTask = index;
     projectTask.title
       ? (editorTitle.value = projectTask.title)
@@ -153,35 +155,60 @@ function addEditBtn(projectTask, index) {
   });
 }
 
-const allProjects = document.querySelector("#all-projects");
+function addDeleteBtn(projectTask, index) {
+  const btn = document.createElement("button");
+  btn.textContent = "Delete";
+  content.appendChild(btn);
+  btn.addEventListener("click", () => {
+    projectTask.splice(index, 1);
+    renderTasks();
+  });
+}
 
-allProjects.addEventListener("change", () => {
-  renderTasks();
-});
+function pushTasksToDom(project, projectIndex) {
+  project.tasks.forEach((task, index) => {
+    const para = document.createElement("p");
+    if (task.priority) para.textContent += "[Bell] ";
+    para.textContent += `${task.title} `;
+    if (task.dueDate) para.textContent += `[${task.dueDate}] `;
+    if (allProjects.checked) para.textContent += `{${project.name}}`;
 
-function renderAllTasks() {
-  projects.forEach((project, projectIndex) => {
-    project.tasks.forEach((task) => {
-      const para = document.createElement("p");
-      para.textContent = `${task.title} DueDate${task.dueDate} ${project.name}`;
-      content.appendChild(para);
-    });
+    content.appendChild(para);
+    addEditBtn(task, index, projectIndex);
+    addDeleteBtn(project.tasks, index);
   });
 }
 
 function renderTasks() {
   clearContent();
   if (allProjects.checked) {
-    renderAllTasks();
-  } else {
-    const tasks = projects[currentProject].tasks;
-
-    tasks.forEach((task, index) => {
-      const para = document.createElement("p");
-      para.textContent = `${task.title} DueDate${task.dueDate}`;
-      content.appendChild(para);
-      addEditBtn(task, index);
-      addDeleteBtn(tasks, index);
+    projects.forEach((project, projectIndex) => {
+      pushTasksToDom(project, projectIndex);
     });
+  } else {
+    pushTasksToDom(projects[openingProject], openingProject);
   }
 }
+
+// Editor modal
+const editor = document.querySelector("dialog");
+const editorTitle = document.querySelector("#edit-title");
+const editorDescription = document.querySelector("#edit-description");
+const editorDueDate = document.querySelector("#edit-due-date");
+const editorPriority = document.querySelector("#edit-priority");
+
+editor.addEventListener("click", (e) => {
+  const target = e.target;
+  if (target.classList.contains("edit-submit-btn")) {
+    projects[openingProject].tasks[openingTask].title = editorTitle.value;
+    projects[openingProject].tasks[openingTask].description =
+      editorDescription.value;
+    projects[openingProject].tasks[openingTask].dueDate = editorDueDate.value;
+    projects[openingProject].tasks[openingTask].priority =
+      editorPriority.checked;
+    renderTasks();
+  }
+  if (target.classList.contains("edit-close-btn")) {
+    editor.close();
+  }
+});

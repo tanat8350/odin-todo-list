@@ -25,7 +25,7 @@
         </div>
         <div>
           <label for="edit-due-date">Due Date</label>
-          <input type="text" name="edit-due-date" id="edit-due-date">
+          <input type="date" name="edit-due-date" id="edit-due-date">
         </div>
         <div>
           <label for="edit-priority">Priority</label>
@@ -35,22 +35,28 @@
         <button class="edit-close-btn" type="button">Close</button>
       </form>
     </dialog>
+
     <div class="project-new-container">
       <label for="project-new">Create New Project</label>
       <input name="project-new" id="project-new">
       <button class="project-new-btn">Create</button>
+      <span class="project-new-error"></span>
     </div>
-    <div>
+
+    <div class="project-container">
       <label for="project-list">Select Project</label>
-      <select name="project-list" id="project-list">
-      </select>
-      <button class="project-delete-btn">Delete Current Project</button>
+      <select name="project-list" id="project-list"></select>
+      <input type="text" name="project-rename" id="project-rename" placeholder="rename">
+      <button class="project-rename-btn">Rename</button>
+      <button class="project-delete-btn">Delete</button>
     </div>
+
     <div>
       <label for="all-projects">All Projects</label>
       <input type="checkbox" name="all-projects" id="all-projects">
       </input>
     </div>
+
     <div class="new-task-container">
       <div>
         <label for="new-task-title">New Task</label>
