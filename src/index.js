@@ -1,15 +1,9 @@
-const projects = [];
-let openingProject = 0;
-let openingTask;
-
 class Project {
   constructor(name) {
     this.name = name;
     this.tasks = [];
   }
 }
-projects.push(new Project("test1"));
-projects.push(new Project("test2"));
 
 class Task {
   constructor(title, dueDate, description, priority) {
@@ -18,6 +12,15 @@ class Task {
     this.description = description;
     this.priority = priority;
   }
+}
+const projects = JSON.parse(localStorage.getItem("data")) || [
+  new Project("Default"),
+];
+let openingProject = 0;
+let openingTask;
+
+function saveToLocal() {
+  localStorage.setItem("data", JSON.stringify(projects));
 }
 
 // Create New Project
@@ -64,6 +67,7 @@ projectContainer.addEventListener("click", (e) => {
 
   if (target.classList.contains("project-delete-btn")) {
     projects.splice(openingProject, 1);
+    if (projects.length === 0) projects.push(new Project("Default"));
     renderProjectList();
     renderTasks();
   }
@@ -96,8 +100,8 @@ function renderProjectList() {
 
     selectProjectList.appendChild(option);
   });
+  saveToLocal();
 }
-renderProjectList();
 
 // All Projects
 const allProjects = document.querySelector("#all-projects");
@@ -188,6 +192,7 @@ function renderTasks() {
   } else {
     pushTasksToDom(projects[openingProject], openingProject);
   }
+  saveToLocal();
 }
 
 // Editor modal
@@ -212,3 +217,9 @@ editor.addEventListener("click", (e) => {
     editor.close();
   }
 });
+
+// Init
+(function () {
+  renderProjectList();
+  renderTasks();
+})();
