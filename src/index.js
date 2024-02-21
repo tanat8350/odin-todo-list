@@ -1,3 +1,5 @@
+import "./style.css";
+
 class Project {
   constructor(name) {
     this.name = name;
